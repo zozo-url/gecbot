@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "googleapis": "^39.2.0",
     "jimp": "^0.6.4",
     "twit": "^2.2.11"
   }

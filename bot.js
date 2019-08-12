@@ -13,30 +13,36 @@ var par3 = 5;
 var tweetReady = false;
 
 var images = ['images/gectree.jpg', 'images/gecz.png'];
-
 var jimps = [];
 
 //this triggers the image manipulation + creating/sending the tweet
-setInterval(tweetSomething, 63200000);
-// setInterval(tweetSomething, 30000);
-function tweetSomething () {
-    makeImage();
-    tweetIt();
-};
+// setInterval(tweetSomething, 63200000);
+tweetSomething();
+async function tweetSomething() {
+    console.log('calling');
+    var result = await makeImage();
+    console.log(result);
+    tweetReady = true;
+    tweetIt(result)
+}
+// function tweetSomething () {
+//     makeImage(image, callback);
+//     tweetIt();
+// };
 
 function makeImage () {
     var selectedEffect1 = effects1[Math.floor(Math.random()*6)];
     var selectedEffect2 = effects2[Math.floor(Math.random()*4)];
     var selectedEffect3 = effects3[Math.floor(Math.random()*6)];
-    
+    var done = false;
     images.map((image, i) => {
         jimps.push(Jimp.read(images[i]));
     });
-
-    Promise.all(jimps).then(data => {
+  return new Promise ((resolve, reject) => { 
+        Promise.all(jimps).then(data => {
         return Promise.all(jimps);
     }). then (data => {
-        data[0].composite(data[1], (Math.floor(Math.random()*1100)), (Math.floor(Math.random()*1100)));
+        data[0].composite(data[1], (Math.floor(Math.random()*230)), (Math.floor(Math.random()*360)));
         data[0].color([  
             {apply: selectedEffect1, params: [par1]}, 
             {apply: selectedEffect2, params: [par2]},
@@ -44,31 +50,39 @@ function makeImage () {
         ]);
         data[0].posterize(12);
         data[0].write("images/gectree.jpg");
-    });
-    tweetReady = true;
-};
+    }).then(
+       done = true
+    )
+        if(done){
+            resolve("images/gectree.jpg")
+        }
+   else {
+       reject()
+   }
+  })
+}
 
-function gecTime () {
-    var gec = 10;
-    gec = gec * (Math.pow(10, counter));
-    counter++;
-    return gec;
-};
+// function gecTime () {
+//     var gec = 10;
+//     gec = gec * (Math.pow(10, counter));
+//     counter++;
+//     return gec;
+// };
 
-function tweetIt() {
+function tweetIt(image) {
     while(tweetReady == false){};
     if (tweetReady == true){
+        console.log('tweet is ready!')
         tweetReady == false;
     };
 
-    var gecNumber = gecTime();
-    var gecStatus = gecNumber.toString() + " gecs";
-    if (gecStatus.length > 260) {
-        counter = 1;
-    };
-    var filename = 'images/gectree.jpg';
+    // var gecNumber = gecTime();
+    // var gecStatus = gecNumber.toString() + " gecs";
+    // if (gecStatus.length > 260) {
+    //     counter = 1;
+    // };
     var params = { encoding: 'base64' };
-    var b64 = fs.readFileSync(filename, params);
+    var b64 = fs.readFileSync(image, params);
         
     T.post('media/upload', { media_data: b64 }, uploaded);
     
@@ -76,7 +90,7 @@ function tweetIt() {
         //this is where I tweet!
         var id = data.media_id_string;
         var tweet = {
-            status: gecStatus,
+            status: " ",
             media_ids: [id]
         };
         T.post('statuses/update', tweet, tweeted);
